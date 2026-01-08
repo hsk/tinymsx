@@ -3,19 +3,19 @@
  * SUZUKI PLAN - TinyMSX - TMS9918A Emulator
  * -----------------------------------------------------------------------------
  * The MIT License (MIT)
- * 
+ *
  * Copyright (c) 2020 Yoji Suzuki.
- * 
+ *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
  * in the Software without restriction, including without limitation the rights
  * to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
  * copies of the Software, and to permit persons to whom the Software is
  * furnished to do so, subject to the following conditions:
- * 
+ *
  * The above copyright notice and this permission notice shall be included in
  * all copies or substantial portions of the Software.
- * 
+ *
  * THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
  * IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
  * FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
@@ -33,40 +33,40 @@
 #define TMS9918A_SCREEN_WIDTH 284
 #define TMS9918A_SCREEN_HEIGHT 240
 
-/**
- * Note about the Screen Resolution: 284 x 240
- * =================================================
- * Pixel (horizontal) display timings:
- *   Left blanking:   2Hz (skip)
- *     Color burst:  14Hz (skip)
- *   Left blanking:   8Hz (skip)
- *     Left border:  13Hz (RENDER)
- *  Active display: 256Hz (RENDER)
- *    Right border:  15Hz (RENDER)
- *  Right blanking:   8Hz (skip)
- * Horizontal sync:  26Hz (skip)
- *           Total: 342Hz (render: 284 pixels)
- * =================================================
- * Scanline (vertical) display timings:
- *    Top blanking:  13 lines (skip)
- *      Top border:   3 lines (skip)
- *      Top border:  24 lines (RENDER)
- *  Active display: 192 lines (RENDER)
- *   Bottom border:  24 lines (RENDER)
- * Bottom blanking:   3 lines (skip)
- *   Vertical sync:   3 lines (skip)
- *           Total: 262 lines (render: 240 lines)
- * =================================================
- */
+ /**
+  * Note about the Screen Resolution: 284 x 240
+  * =================================================
+  * Pixel (horizontal) display timings:
+  *   Left blanking:   2Hz (skip)
+  *     Color burst:  14Hz (skip)
+  *   Left blanking:   8Hz (skip)
+  *     Left border:  13Hz (RENDER)
+  *  Active display: 256Hz (RENDER)
+  *    Right border:  15Hz (RENDER)
+  *  Right blanking:   8Hz (skip)
+  * Horizontal sync:  26Hz (skip)
+  *           Total: 342Hz (render: 284 pixels)
+  * =================================================
+  * Scanline (vertical) display timings:
+  *    Top blanking:  13 lines (skip)
+  *      Top border:   3 lines (skip)
+  *      Top border:  24 lines (RENDER)
+  *  Active display: 192 lines (RENDER)
+  *   Bottom border:  24 lines (RENDER)
+  * Bottom blanking:   3 lines (skip)
+  *   Vertical sync:   3 lines (skip)
+  *           Total: 262 lines (render: 240 lines)
+  * =================================================
+  */
 
 class TMS9918A
 {
-  private:
+private:
     void* arg;
     void (*detectBlank)(void* arg);
     void (*detectBreak)(void* arg);
 
-  public:
+public:
     unsigned short display[TMS9918A_SCREEN_WIDTH * TMS9918A_SCREEN_HEIGHT];
     unsigned short palette[16];
 
@@ -91,26 +91,29 @@ class TMS9918A
         this->arg = arg;
         this->detectBlank = detectBlank;
         this->detectBreak = detectBreak;
-        unsigned int rgb[16] = {0x000000, 0x000000, 0x3EB849, 0x74D07D, 0x5955E0, 0x8076F1, 0xB95E51, 0x65DBEF, 0xDB6559, 0xFF897D, 0xCCC35E, 0xDED087, 0x3AA241, 0xB766B5, 0xCCCCCC, 0xFFFFFF};
+        unsigned int rgb[16] = {
+            0x000000, 0x000000, 0x3EB849, 0x74D07D, 0x5955E0, 0x8076F1, 0xB95E51, 0x65DBEF,
+            0xDB6559, 0xFF897D, 0xCCC35E, 0xDED087, 0x3AA241, 0xB766B5, 0xCCCCCC, 0xFFFFFF
+        };
         switch (colorMode) {
-            case 0:
-                for (int i = 0; i < 16; i++) {
-                    this->palette[i] = 0;
-                    this->palette[i] |= (rgb[i] & 0b111110000000000000000000) >> 9;
-                    this->palette[i] |= (rgb[i] & 0b000000001111100000000000) >> 6;
-                    this->palette[i] |= (rgb[i] & 0b000000000000000011111000) >> 3;
-                }
-                break;
-            case 1:
-                for (int i = 0; i < 16; i++) {
-                    this->palette[i] = 0;
-                    this->palette[i] |= (rgb[i] & 0b111110000000000000000000) >> 8;
-                    this->palette[i] |= (rgb[i] & 0b000000001111110000000000) >> 5;
-                    this->palette[i] |= (rgb[i] & 0b000000000000000011111000) >> 3;
-                }
-                break;
-            default:
-                memset(this->palette, 0, sizeof(this->palette));
+        case 0:
+            for (int i = 0; i < 16; i++) {
+                this->palette[i] = 0;
+                this->palette[i] |= (rgb[i] & 0b111110000000000000000000) >> 9;
+                this->palette[i] |= (rgb[i] & 0b000000001111100000000000) >> 6;
+                this->palette[i] |= (rgb[i] & 0b000000000000000011111000) >> 3;
+            }
+            break;
+        case 1:
+            for (int i = 0; i < 16; i++) {
+                this->palette[i] = 0;
+                this->palette[i] |= (rgb[i] & 0b111110000000000000000000) >> 8;
+                this->palette[i] |= (rgb[i] & 0b000000001111110000000000) >> 5;
+                this->palette[i] |= (rgb[i] & 0b000000000000000011111000) >> 3;
+            }
+            break;
+        default:
+            memset(this->palette, 0, sizeof(this->palette));
         }
         this->reset();
     }
@@ -144,7 +147,8 @@ class TMS9918A
             if (24 <= this->ctx.countH && this->ctx.countH < 24 + TMS9918A_SCREEN_WIDTH) {
                 int dcur = (this->ctx.countV - 3) * TMS9918A_SCREEN_WIDTH + this->ctx.countH - 24;
                 this->display[dcur] = this->getBackdropColor();
-            } else if (24 + TMS9918A_SCREEN_WIDTH == this->ctx.countH) {
+            }
+            else if (24 + TMS9918A_SCREEN_WIDTH == this->ctx.countH) {
                 this->renderScanline(this->ctx.countV - 27);
             }
         }
@@ -159,16 +163,16 @@ class TMS9918A
         if (342 == this->ctx.countH) {
             this->ctx.countH -= 342;
             switch (++this->ctx.countV) {
-                case 238:
-                    this->ctx.stat |= 0x80;
-                    if (this->isEnabledInterrupt()) {
-                        this->detectBlank(this->arg);
-                    }
-                    break;
-                case 262:
-                    this->ctx.countV -= 262;
-                    this->detectBreak(this->arg);
-                    break;
+            case 238:
+                this->ctx.stat |= 0x80;
+                if (this->isEnabledInterrupt()) {
+                    this->detectBlank(this->arg);
+                }
+                break;
+            case 262:
+                this->ctx.countV -= 262;
+                this->detectBreak(this->arg);
+                break;
             }
         }
     }
@@ -205,26 +209,29 @@ class TMS9918A
         if (2 == this->ctx.latch) {
             if (this->ctx.tmpAddr[1] & 0b10000000) {
                 this->updateRegister();
-            } else if (this->ctx.tmpAddr[1] & 0b01000000) {
+            }
+            else if (this->ctx.tmpAddr[1] & 0b01000000) {
                 this->updateAddress();
-            } else {
+            }
+            else {
                 this->updateAddress();
                 this->readVideoMemory();
             }
-        } else if (1 == this->ctx.latch) {
+        }
+        else if (1 == this->ctx.latch) {
             this->ctx.addr &= 0xFF00;
             this->ctx.addr |= this->ctx.tmpAddr[0];
         }
     }
 
-  private:
+private:
     inline void renderScanline(int lineNumber)
     {
         // TODO: Several modes (1, 3, undocumented) are not implemented
         if (0 <= lineNumber && lineNumber < 192 && this->isEnabledScreen()) {
             switch (this->getVideoMode()) {
-                case 0: this->renderScanlineMode0(lineNumber); break;
-                case 2: this->renderScanlineMode2(lineNumber); break;
+            case 0: this->renderScanlineMode0(lineNumber); break;
+            case 2: this->renderScanlineMode2(lineNumber); break;
             }
         }
     }
@@ -277,11 +284,11 @@ class TMS9918A
             printf("Change VDP external video input enabled: %s\n", this->isEnabledExternalVideoInput() ? "ENABLED" : "DISABLED");
         }
         switch (this->ctx.tmpAddr[1] & 0b00001111) {
-            case 0x2: printf("update Pattern Name Table address: $%04X\n", this->ctx.reg[2] << 10); break;
-            case 0x3: printf("update Color Table address: $%04X (MASK:0b%d%d%d%d%d%d%d11)\n", (this->ctx.reg[3] & 0x80) << 6, this->ctx.reg[3] & 0b01000000 ? 1 : 0, this->ctx.reg[3] & 0b00100000 ? 1 : 0, this->ctx.reg[3] & 0b00010000 ? 1 : 0, this->ctx.reg[3] & 0b00001000 ? 1 : 0, this->ctx.reg[3] & 0b00000100 ? 1 : 0, this->ctx.reg[3] & 0b00000010 ? 1 : 0, this->ctx.reg[3] & 0b00000001 ? 1 : 0); break;
-            case 0x4: printf("update Pattern Generator Table address: $%04X (MASK:0b%d%d1111111)\n", (this->ctx.reg[4] & 0b100) << 11, this->ctx.reg[4] & 0b010 ? 1 : 0, this->ctx.reg[4] & 0b001 ? 1 : 0); break;
-            case 0x5: printf("update Sprite Attribute Table address: $%04X\n", this->ctx.reg[5] << 7); break;
-            case 0x6: printf("update Sprite Generator Table address: $%04X\n", this->ctx.reg[6] << 11); break;
+        case 0x2: printf("update Pattern Name Table address: $%04X\n", this->ctx.reg[2] << 10); break;
+        case 0x3: printf("update Color Table address: $%04X (MASK:0b%d%d%d%d%d%d%d11)\n", (this->ctx.reg[3] & 0x80) << 6, this->ctx.reg[3] & 0b01000000 ? 1 : 0, this->ctx.reg[3] & 0b00100000 ? 1 : 0, this->ctx.reg[3] & 0b00010000 ? 1 : 0, this->ctx.reg[3] & 0b00001000 ? 1 : 0, this->ctx.reg[3] & 0b00000100 ? 1 : 0, this->ctx.reg[3] & 0b00000010 ? 1 : 0, this->ctx.reg[3] & 0b00000001 ? 1 : 0); break;
+        case 0x4: printf("update Pattern Generator Table address: $%04X (MASK:0b%d%d1111111)\n", (this->ctx.reg[4] & 0b100) << 11, this->ctx.reg[4] & 0b010 ? 1 : 0, this->ctx.reg[4] & 0b001 ? 1 : 0); break;
+        case 0x5: printf("update Sprite Attribute Table address: $%04X\n", this->ctx.reg[5] << 7); break;
+        case 0x6: printf("update Sprite Generator Table address: $%04X\n", this->ctx.reg[6] << 11); break;
         }
 #endif
     }
@@ -367,7 +374,7 @@ class TMS9918A
             0b00001000,
             0b00000100,
             0b00000010,
-            0b00000001};
+            0b00000001 };
         bool si = this->ctx.reg[1] & 0b00000010 ? true : false;
         bool mag = this->ctx.reg[1] & 0b00000001 ? true : false;
         int sa = (this->ctx.reg[5] & 0b01111111) << 7;
@@ -397,7 +404,8 @@ class TMS9918A
                             this->ctx.stat &= 0b11100000;
                             this->ctx.stat |= 0b01000000 | i;
                             break;
-                        } else {
+                        }
+                        else {
                             this->ctx.stat &= 0b11100000;
                             this->ctx.stat |= i;
                         }
@@ -430,9 +438,10 @@ class TMS9918A
                                 }
                             }
                             overflow = x == 0xFF;
-                       }
+                        }
                     }
-                } else {
+                }
+                else {
                     // 8x8 x 2
                     if (y <= lineNumber && lineNumber < y + 16) {
                         sn++;
@@ -440,7 +449,8 @@ class TMS9918A
                             this->ctx.stat &= 0b11100000;
                             this->ctx.stat |= 0b01000000 | i;
                             break;
-                        } else {
+                        }
+                        else {
                             this->ctx.stat &= 0b11100000;
                             this->ctx.stat |= i;
                         }
@@ -461,7 +471,8 @@ class TMS9918A
                         }
                     }
                 }
-            } else {
+            }
+            else {
                 if (si) {
                     // 16x16 x 1
                     if (y <= lineNumber && lineNumber < y + 16) {
@@ -470,7 +481,8 @@ class TMS9918A
                             this->ctx.stat &= 0b11100000;
                             this->ctx.stat |= 0b01000000 | i;
                             break;
-                        } else {
+                        }
+                        else {
                             this->ctx.stat &= 0b11100000;
                             this->ctx.stat |= i;
                         }
@@ -505,7 +517,8 @@ class TMS9918A
                             overflow = x == 0xFF;
                         }
                     }
-                } else {
+                }
+                else {
                     // 8x8 x 1
                     if (y <= lineNumber && lineNumber < y + 8) {
                         sn++;
@@ -513,7 +526,8 @@ class TMS9918A
                             this->ctx.stat &= 0b11100000;
                             this->ctx.stat |= 0b01000000 | i;
                             break;
-                        } else {
+                        }
+                        else {
                             this->ctx.stat &= 0b11100000;
                             this->ctx.stat |= i;
                         }

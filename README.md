@@ -17,7 +17,7 @@ TinyMSX is a multi-emulator core library for C/C++ that supports following game 
 ### Basic usage
 
 ```c++
-#include "tinymsx.h"
+#include "tinymsx.hpp"
 ```
 
 ```c++
