@@ -394,6 +394,7 @@ private:
             unsigned char col = this->ctx.ram[cur++];
             if (col & 0x80) x -= 32;
             col &= 0b00001111;
+            if (col == 0) continue;
             y++;
             if (mag) {
                 if (si) {
